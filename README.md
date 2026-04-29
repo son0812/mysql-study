@@ -10,7 +10,7 @@ SQL 문제풀이 아카이브
 
 | 폴더 | 출처 |
 |------|------|
-| 프로그래머스 SQL 고득점 Kit | [프로그래머스 SQL 고득점 Kit](https://school.programmers.co.kr/learn/challenges?tab=sql_practice_kit) |
+| 프로그래머스 SQL 고득점 Kit | [프로그래머스 SQL 고득점 Kit](https://programmers.co.kr/) |
 | LeetCode Database | [LeetCode Database](https://leetcode.com/problem-list/database/)|
 | HackerRank Solve SQL | [HackerRank Solve SQL](https://www.hackerrank.com/domains/sql) |
 | 혼자 공부하는 SQL | [혼자 공부하는 SQL](https://www.hanbit.co.kr/store/books/look.php?p_code=B6846155853) |
