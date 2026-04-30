@@ -4,6 +4,7 @@
 
 🔗 https://school.programmers.co.kr/learn/courses/30/lessons/301646
 
+<img width="1155" height="547" alt="화면 캡처 2026-04-30 182019" src="https://github.com/user-attachments/assets/86e5c0b1-db68-4861-b352-ae213cf1d0da" />
 
 문제 자체는 간단하게 GENOTYPE에서 2번 형질은 없고, 1번 또는 3번 형질이 있는 경우만 COUNT하라는 문제였다.
 
