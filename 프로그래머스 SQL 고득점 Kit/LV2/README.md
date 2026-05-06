@@ -1,35 +1,32 @@
 ### 1. SELECT문 오답노트
 
-**특정 형질을 가지는 대장균 찾기**
+**1-(1) 조건에 맞는 개발자 찾기**
 
-🔗 https://school.programmers.co.kr/learn/courses/30/lessons/301646
+🔗 https://school.programmers.co.kr/learn/courses/30/lessons/276034
 
-<img width="1155" height="547" alt="화면 캡처 2026-04-30 182019" src="https://github.com/user-attachments/assets/86e5c0b1-db68-4861-b352-ae213cf1d0da" />
+<img width="1235" height="585" alt="image" src="https://github.com/user-attachments/assets/e5ddbb86-4e11-41dc-a044-9b8b4b8c8098" />
 
-문제 자체는 간단하게 GENOTYPE에서 2번 형질은 없고, 1번 또는 3번 형질이 있는 경우만 COUNT하라는 문제였다.
+DEVELOPERS 테이블에서 Python이나 C# 스킬을 가진 개발자의 정보를 조회하는 것이 핵심인 문제였다.
 
-여기서 `&` 는 논리 연산자가 아니라 비트연산자이다.
+이때 `DEVELOPERS` 테이블의 `SKILL_CODE` 컬럼은  400 (=b'110010000')과 같이 비트마스크(2의 제곱 합) 형태로 저장하는 구조이다.
 
-- & : 같은 위치 bit가 둘 다 1이면 1을, 아니면 0을 반환 → ⭐각 비트 자리마다 AND 연산을 수행하고, 그 결과를 합친 값을 반환
-- | : 같은 위치 bit가 둘 중 하나라도 1이면 1을, 아니면 0을 반환
- 
-📍예시 : 3을 2진수로 표현하면 011이고 6은 110인데 SELECT 3&6의 경우 3형질은 0,1로 둘 다 1인 경우가 아니기에 0을반환하고 
-2형질은 1,1이기에 1을 반환하고 1형질은 1,0으로 둘 다 1인 경우가 아니기에 0을 반환한다. 따라서 결과값은 010으로 결과가 나오게 된다.
+이런 경우, 특정 스킬 보유 여부는 비트 연산 (&) 으로 확인해야 한다. 
 
-🔗예시 출처 : https://k-wien1589.tistory.com/122
+처음에 문제를 접근했을 때는 LEFT JOIN SKILLCODES AS S ON S.CODE = D.SKILL_CODE과 같이 접근했으나 이런 경우, 하나의 스킬만 가진 경우만 매칭되고 여러 스킬을 가진 경우 전부 누락된다는 문제가 존재한다. 
 
-따라서 GENOTYPE & 2를 하게 되면 8,15...와 같은 GENOTYPE이 2진수로 변환했을 때 이것이 2번 형질과 동일한 위치의 비트값을 확인하게 된다. 
-그렇다면 2번 형질은 있으면 안되고 1번 또는 3번 형질은 포함해야한다는 문제를 WHERE절로 풀어보면 
-`(GENOTYPE & 2) = 0`에 AND절을 사용하고 `(GENOTYPE & 1) !=0 OR (GENOTYPE & 4) != 0` 을 사용하여 연결해준다.  
-1,3번 형질인데 1,4를 쓴이유는 1번 형질의 값이 이진수로는 1, 십진수로는 1,  3번형질이 이진수로는 100, 십진수로는 4이기 때문에 위와같이 작성한다.
+즉, `SKILL_CODE`는 하나의 값이 아니라여러 스킬의 합(비트)이기에 비교 방식이 아니라 포함 여부 체크 가 필요하다.
 
-예시로 `15&2`를 구해보자. 
-15를 2진수로 변환하면 1111이고 2를 2진수로 변환하면 10이기에 15&2로 동일한 위치의 비트를 확인하면 
-`& : 같은 위치 bit가 둘 다 1이면 1을, 아니면 0을 반환`라는 원칙에 따라 그 결과 비트가 0010이 되고, 이는 10진수로 2이다.
-따라서 결과값이 2가 되는 것이다. 즉, 결과값이 0만 아니라면 `기준 숫자 & 기준 형질` 로 비트 연산을 했을 때 해당 형질을 포함하고 있다고 볼 수 있다.
+특정 스킬 비트가 포함되어 있으면 0이 아니라는 특성을 반영하여 `D.SKILL_CODE & S.CODE != 0`와 같은 코드를 WHERE절에 넣는다. 
 
-최종적으로 `WHERE (GENOTYPE & 2) = 0 AND ((GENOTYPE & 1) != 0  OR (GENOTYPE & 4) != 0)`을 사용하였다. 
- 
+➕ 추가적으로 JOIN 구조상 Python + C# 둘 다 가진 경우 중복 행 발생할 수 있기에 SELECT 절에 `DISTINCT`를 사용하여 중복을 제거한다. 
 
-➕추가적으로 `CONV(데이터, 원본 진법, 변환할 진법)`으로 숫자 기반 시스템을 다른 진법의 수로 표시하는 것도 가능한데 이 경우에는 `&`를 쓰는 편이 더 간단하게 풀릴 것 같아서 사용하지 않았다.
- 
+최종적으로 구현된 코드는 다음과 같다
+
+```
+-- SKILL_CODE가 비트마스크(여러 스킬의 합) 구조이기에 비트 연산자를 써서 확인해야한다 D.SKILL_CODE & S.CODE != 0
+SELECT DISTINCT D.ID,D.EMAIL,D.FIRST_NAME,D.LAST_NAME	
+FROM DEVELOPERS AS D
+LEFT JOIN SKILLCODES AS S ON S.CODE & D.SKILL_CODE !=0
+WHERE S.NAME IN ('Python','C#')
+ORDER BY D.ID ASC;
+```
